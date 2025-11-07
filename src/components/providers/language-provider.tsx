@@ -6,7 +6,7 @@ import { translations, Language } from "@/lib/i18n/translations";
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: typeof translations.en;
+  t: typeof translations.en | typeof translations.ar;
   dir: "ltr" | "rtl";
 }
 
@@ -42,7 +42,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     setLanguageState(lang);
   };
 
-  const value = {
+  const value: LanguageContextType = {
     language,
     setLanguage,
     t: translations[language],

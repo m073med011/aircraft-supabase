@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { Database } from "@/types/database.types";
 
 // PUT - Update user
 export async function PUT(
@@ -35,7 +36,7 @@ export async function PUT(
     // Use admin client for admin operations
     const adminClient = createAdminClient();
 
-    // Update profile in profiles table
+    // Build update data for profile
     const updateData: any = {};
     if (full_name !== undefined) updateData.full_name = full_name;
     if (role !== undefined && (role === "user" || role === "admin")) {
@@ -44,14 +45,27 @@ export async function PUT(
     if (email !== undefined) updateData.email = email;
     if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
 
-    const { data: updatedProfile, error } = await adminClient
+    // Update profile if there are changes
+    if (Object.keys(updateData).length > 0) {
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update(updateData)
+        .eq("id", id);
+
+      if (updateError) {
+        console.error("Error updating profile:", updateError);
+        throw updateError;
+      }
+    }
+
+    // Fetch the updated profile
+    const { data: updatedProfile, error: profileError } = await supabase
       .from("profiles")
-      .update(updateData)
-      .eq("id", id)
       .select()
+      .eq("id", id)
       .single();
 
-    if (error) throw error;
+    if (profileError) throw profileError;
 
     // Update auth user (email, password, user_metadata)
     const authUpdateData: any = {};

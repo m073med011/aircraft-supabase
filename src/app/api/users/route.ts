@@ -107,7 +107,7 @@ export async function POST(request: Request) {
       }
 
       if (Object.keys(profileUpdateData).length > 0) {
-        const { error: updateError } = await adminClient
+        const { error: updateError } = await supabase
           .from("profiles")
           .update(profileUpdateData)
           .eq("id", newUser.user.id);
